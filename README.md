@@ -17,3 +17,5 @@ among others).
 
 The data presented do not necessarily serve as proof for either position, but as some kind of 
 indication of how likely it is cyclists still use doping (for the Tour de France).
+
+Many thanks to [Martin Theus](http://www.rosuda.org/~theus/), since I have used the data he put online!
