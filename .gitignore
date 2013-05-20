@@ -12,3 +12,9 @@ temp_2010.csv
 temp_2011.csv
 temp_2012.csv
 *.txt
+*.pyc
+bin
+include
+lib
+Procfile
+*venv

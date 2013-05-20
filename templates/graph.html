@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+  <meta charset="utf-8">
+  <head>
+    <style>
+        body {
+              font: 10px sans-serif;
+              }
+        
+        .xaxis path,
+        .xaxis line {
+                    fill: none;
+                    stroke: #000;
+                    shape-rendering: crispEdges;
+                    }
+
+        .xaxis text {
+                    font-family: sans-serif;
+                    font-size: 10px;
+                    }
+        
+        .yaxis path,
+        .yaxis line {
+                    fill: none;
+                    stroke: #000;
+                    shape-rendering: crispEdges;
+                    }
+
+        .yaxis text {
+                    font-family: sans-serif;
+                    font-size: 10px;
+                    }
+        
+        circle {
+                    fill: blue;
+                 }
+
+        .line {
+                    fill: none;
+                    stroke: #ad494a;
+                    stroke-width: 1.5px;
+                 }
+
+    </style>
+    <title>Tour de France stats</title>
+    <script type="text/javascript" src="../static/d3.v3/d3.v3.js"></script>
+  </head>
+  <body>
+  
+  <script>
+    
+    var margin = {top: 50, right: 60, bottom: 100, left: 60},
+          width = 1300 - margin.left - margin.right,
+          height = 800 - margin.top - margin.bottom;
+    
+    var svg = d3.select("body").append("svg")
+                .attr("width", width).attr("height", height);
+    
+    svg.append("rect").attr("x", width-90).attr("y", 30).attr("width", 100)
+       .attr("height",30).attr("fill", "blue").attr("opacity", 100)
+       .attr("id", "overall_rect")
+    svg.append("rect").attr("x", width-90).attr("y", 75).attr("width", 100)
+       .attr("height",30).attr("fill", "blue").attr("opacity", 0.3)
+       .attr("id", "mountain_rect")
+    svg.append("rect").attr("x", width-90).attr("y", 120).attr("width", 100)
+       .attr("height",30).attr("fill", "blue").attr("opacity", 0.3)
+       .attr("id", "time_trial_rect")
+
+    svg.append("text").attr("x", width-45).attr("y", 50).attr("font-size", 16)
+       .attr("text-anchor", "middle").style("font-weight","bold")
+       .attr("fill", "white").text("Overall")
+       .on("click", function() { redraw("Overall") ;})
+    svg.append("text").attr("x", width-45).attr("y", 95).attr("font-size", 16)
+       .attr("text-anchor", "middle").style("font-weight","bold")
+       .attr("fill", "white").text("Mountains")
+       .on("click", function() { redraw("Mountains") ;})
+    svg.append("text").attr("x", width-45).attr("y", 140).attr("font-size", 16)
+       .attr("text-anchor", "middle").style("font-weight","bold")
+       .attr("fill", "white").text("Time Trials")
+       .on("click", function() { redraw("TimeTrials") ;})
+    
+    d3.csv("../static/tdf.csv", function(csv){
+      var x = d3.scale.linear().domain([2004, 2013]).range([60, width-100]),
+          y = d3.scale.linear().domain([36, 42]).range([height-20, 20]),
+          xAxis = d3.svg.axis().scale(x).orient('bottom')
+                    .ticks(7).tickFormat(function(d,i) {
+                    if (d>2004 && d<2013) {return d ;}}),
+          yAxis = d3.svg.axis().scale(y).orient('left');
+      
+      var med = [[2005, d3.median(csv, function(d) {if (d.Year==2005) {return +d.Total ;} })],
+                 [2006, d3.median(csv, function(d) {if (d.Year==2006) {return +d.Total ;} })],
+                 [2007, d3.median(csv, function(d) {if (d.Year==2007) {return +d.Total ;} })],
+                 [2008, d3.median(csv, function(d) {if (d.Year==2008) {return +d.Total ;} })],
+                 [2010, d3.median(csv, function(d) {if (d.Year==2010) {return +d.Total ;} })],
+                 [2011, d3.median(csv, function(d) {if (d.Year==2011) {return +d.Total ;} })],
+                 [2012, d3.median(csv, function(d) {if (d.Year==2012) {return +d.Total ;} })]];
+      
+      svg.selectAll("circle").data(csv).enter()
+         .append("circle")
+         .attr("cx", function(d) {if (+d.Total>0) {return x(+d.Year) ;}})
+         .attr("cy", function(d) {if (+d.Total>0) {return y(+d.Total) ;}})
+         .attr("r", function(d) {if (+d.Total>0) {return 5 ;}})
+         .style("opacity", 0.1);
+      
+      svg.append("g")
+         .attr("class", "xaxis")
+         .attr("transform", "translate(0, "+(height-20)+")")
+         .call(xAxis);
+      svg.append("g")
+         .attr("class", "yaxis")
+         .attr("transform", "translate(" + margin.left + "," + 0 + ")")
+         .call(yAxis);
+      
+      var line = d3.svg.line()
+                   .interpolate("monotone")
+                   .x(function(d) {return x(d[0])})
+                   .y(function(d) {return y(d[1])});
+      
+      svg.append("path")
+         .datum(med)
+         .attr("class", "line")
+         .attr("d", line);
+    })
+
+    function redraw(marker) {
+        
+        svg.selectAll('rect').transition().duration(1000).style("opacity", 0.3); 
+        
+        if (marker=="Overall") {
+
+          d3.select('#overall_rect').transition().duration(1000).style("opacity", 1)
+        
+          d3.csv("../static/tdf.csv", function(csv){
+            var x = d3.scale.linear().domain([2004, 2013]).range([60, width-100]),
+                y = d3.scale.linear().domain([36, 42]).range([height-20, 20]),
+                yAxis = d3.svg.axis().scale(y).orient('left');
+          
+          d3.select("g.yaxis")
+            .attr("transform", "translate(" + margin.left + "," + 0 + ")")
+            .transition()
+            .duration(1000)
+            .call(yAxis);
+          
+          var med = [[2005, d3.median(csv, function(d) {if (d.Year==2005) {return +d.Total ;} })],
+                     [2006, d3.median(csv, function(d) {if (d.Year==2006) {return +d.Total ;} })],
+                     [2007, d3.median(csv, function(d) {if (d.Year==2007) {return +d.Total ;} })],
+                     [2008, d3.median(csv, function(d) {if (d.Year==2008) {return +d.Total ;} })],
+                     [2010, d3.median(csv, function(d) {if (d.Year==2010) {return +d.Total ;} })],
+                     [2011, d3.median(csv, function(d) {if (d.Year==2011) {return +d.Total ;} })],
+                     [2012, d3.median(csv, function(d) {if (d.Year==2012) {return +d.Total ;} })]];
+          
+          var line = d3.svg.line()
+                       .interpolate("monotone")
+                       .x(function(d) {return x(d[0])})
+                       .y(function(d) {return y(d[1])});
+          
+          svg.select("path.line").datum(med).transition().duration(1000).attr("d", line);
+          svg.selectAll("circle").transition().duration(1000)
+             .attr("cx", function(d) {if (+d.Total>0) {return x(+d.Year) ;}})
+             .attr("cy", function(d) {if (+d.Total>0) {return y(+d.Total) ;}});
+          })        
+        }
+        
+        else if (marker=="Mountains") {
+
+          d3.select('#mountain_rect').transition().duration(1000).style("opacity", 1)
+        
+          d3.csv("../static/tdf.csv", function(csv){
+            var x = d3.scale.linear().domain([2004, 2013]).range([60, width-100]),
+                y = d3.scale.linear().domain([30, 38]).range([height-20, 20]),
+                yAxis = d3.svg.axis().scale(y).orient('left');
+          
+          d3.select("g.yaxis")
+            .attr("transform", "translate(" + margin.left + "," + 0 + ")")
+            .transition()
+            .duration(1000)
+            .call(yAxis);
+          
+          var med = [[2005, d3.median(csv, function(d) {if (d.Year==2005) {return +d.Mtn ;} })],
+                     [2006, d3.median(csv, function(d) {if (d.Year==2006) {return +d.Mtn ;} })],
+                     [2007, d3.median(csv, function(d) {if (d.Year==2007) {return +d.Mtn ;} })],
+                     [2008, d3.median(csv, function(d) {if (d.Year==2008) {return +d.Mtn ;} })],
+                     [2010, d3.median(csv, function(d) {if (d.Year==2010) {return +d.Mtn ;} })],
+                     [2011, d3.median(csv, function(d) {if (d.Year==2011) {return +d.Mtn ;} })],
+                     [2012, d3.median(csv, function(d) {if (d.Year==2012) {return +d.Mtn ;} })]];
+          
+          var line = d3.svg.line()
+                       .interpolate("monotone")
+                       .x(function(d) {return x(d[0])})
+                       .y(function(d) {return y(d[1])});
+          
+          svg.select("path.line").datum(med).transition().duration(1000).attr("d", line);
+          svg.selectAll("circle").transition().duration(1000)
+             .attr("cx", function(d) {if (+d.Mtn>0) {return x(+d.Year) ;}})
+             .attr("cy", function(d) {if (+d.Mtn>0) {return y(+d.Mtn) ;}});
+          })
+        }
+        
+        else if (marker=="TimeTrials") {
+
+          d3.select('#time_trial_rect').transition().duration(1000).style("opacity", 1)
+        
+          d3.csv("../static/tdf.csv", function(csv){
+            var x = d3.scale.linear().domain([2004, 2013]).range([60, width-100]),
+                y = d3.scale.linear().domain([34, 54]).range([height-20, 20]),
+                yAxis = d3.svg.axis().scale(y).orient('left');
+          
+          d3.select("g.yaxis")
+            .attr("transform", "translate(" + margin.left + "," + 0 + ")")
+            .transition()
+            .duration(1000)
+            .call(yAxis);
+          
+          var med = [[2005, d3.median(csv, function(d) {if (d.Year==2005) {return +d.Tt ;} })],
+                     [2006, d3.median(csv, function(d) {if (d.Year==2006) {return +d.Tt ;} })],
+                     [2007, d3.median(csv, function(d) {if (d.Year==2007) {return +d.Tt ;} })],
+                     [2008, d3.median(csv, function(d) {if (d.Year==2008) {return +d.Tt ;} })],
+                     [2010, d3.median(csv, function(d) {if (d.Year==2010) {return +d.Tt ;} })],
+                     [2011, d3.median(csv, function(d) {if (d.Year==2011) {return +d.Tt ;} })],
+                     [2012, d3.median(csv, function(d) {if (d.Year==2012) {return +d.Tt ;} })]];
+          
+          var line = d3.svg.line()
+                       .interpolate("monotone")
+                       .x(function(d) {return x(d[0])})
+                       .y(function(d) {return y(d[1])});
+          
+          svg.select("path.line").datum(med).transition().duration(1000).attr("d", line);
+          svg.selectAll("circle").transition().duration(1000)
+             .attr("cx", function(d) {if (+d.Tt>0) {return x(+d.Year) ;}})
+             .attr("cy", function(d) {if (+d.Tt>0) {return y(+d.Tt) ;}});
+          })
+        }
+      };
+
+  </script>
+  </body>
+</html>

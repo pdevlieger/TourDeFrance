@@ -107,15 +107,11 @@ data['mtn_distance'] = data.mtn_stages.apply(lambda x: sum(km_mtn[:x]))
 data['mtn_speed'] = speed_calculator(data['mtn_distance'], data['mtn_time'])
 
 temp = data.filter(tt_stage_columns)
+data['Year'] = 2005
 data['tt_time'] = temp.sum(1)
 data['tt_stages']=temp.count(axis=1)
 data['tt_distance'] = data.tt_stages.apply(lambda x: sum(km_tt[:x]))
 data['tt_speed'] = speed_calculator(data['tt_distance'], data['tt_time'])
 
-database = data.filter(['Name', 'R21', 'overall_speed', 'mtn_speed', 'tt_speed'])
-database.columns = ['Name_2005', 'ranking_2005', 'total_2005', 'mtn_2005', 'tt_2005']
-
-s = pandas.DataFrame([[NaN,]*5]*11, columns = database.columns)
-
-## Add some empty rows for future add-ins.
-database = database.append(s, ignore_index=True)
+database = data.filter(['Year','Name', 'R21', 'overall_speed', 'mtn_speed', 'tt_speed'])
+database.columns = ['Year','Name', 'Ranking', 'Total', 'Mtn', 'Tt']

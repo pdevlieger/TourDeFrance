@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+  <meta charset="utf-8">
+  <head>
+    <link href='http://fonts.googleapis.com/css?family=Lobster' rel='stylesheet' type='text/css'>
+    <style>
+        body {
+              font-family: "Helvetica";
+              }
+
+        h1 {
+              font: 35px sans-serif;
+              text-align: center;
+              font-family: Lobster;
+              color: #ad494a;
+              background-color: gold;
+              }
+
+        p.justify {
+              font: 15px sans-serif;
+              margin:1cm 4cm 0.5cm 4cm;
+              text-align: justify;
+              }
+        
+        p.center {
+              font: 15px sans-serif;
+              margin:0cm 4cm 0cm 4cm;
+              text-align: center;
+              }
+
+        p.bottom {
+              font: 15px sans-serif;
+              margin:0.5cm 4cm 0.5cm 4cm;
+              text-align: center;
+              }
+
+        svg.center {
+              margin-left:auto;
+              margin-right:auto;
+              background-color:#b0e0e6;
+              display:block;
+              }
+
+    </style>
+    <title>Tour de France stats</title>
+    <script type="text/javascript" src="../static/d3.v3/d3.v3.js"></script>
+  </head>
+  <body>
+  <h1>  Tour de France Statistics.
+  </h1>
+    <p class="justify">
+    
+    This website presents some statistics of the Tour de France. It covers all years since 
+    Lance Armstrong raced (except for 2009). There is a lot of talk about the situation 
+    improving in the last couple of years, but is this obvious in the data? The following
+    histogram plots the drop out rate for the Tour de France. A high drop-out rate can mean
+    two things. On the one hand, it can mean the race has become more "pure". Riders have a
+    harder time finishing the Tour de France because there is less doping in the race. On 
+    the other hand, it can also mean the race has become more "polluted" with doping. People
+    drop out more easily, because there is more doping the race. This makes it harder 
+    physically to keep up or finish within the time limit (e.g. in mountain stages).
+    
+    </p>
+    <script>
+      function histogram() {
+        var quitters = [[2005, 0.17989417989417988], [2006, 0.21022727272727271],[2007, 0.25396825396825395], [2008, 0.18994413407821231],[2009, 0],[2010, 0.13705583756345174], [2011, 0.15656565656565657],[2012, 0.22727272727272729]];
+        var margin = {top: 20, right: 15, bottom: 60, left: 60},
+            w = 575 - margin.left - margin.right,
+            h = 220 - margin.top - margin.bottom;    
+        var svg = d3.select("body")
+                    .append("svg")
+                    .attr("width", w)
+                    .attr("height", h)
+                    .attr("class", "center");
+        
+        svg.selectAll("rect")
+           .data(quitters)
+           .enter()
+           .append("rect")
+           .attr("x", function(d, i) { return i*60 + 20 ;})
+           .attr("y", function(d, i) { return h - 25 - d[1]*400 ;})
+           .attr("width", 40)
+           .attr("height", function(d, i) { return d[1]*400 ;})
+           .attr("fill", "gold");
+        
+        function precise_round(num,decimals){
+                 return Math.round(num*Math.pow(10,decimals))/Math.pow(10,decimals);};
+        
+        svg.selectAll("text")
+           .data(quitters).enter().append("text")
+           .attr("font-size", "10px")
+           .text(function(d) { return precise_round(d[1]*100,2)+"%";})
+           .attr("x", function(d, i) { return i*60 + 40;})
+           .attr("y", function(d, i) { return h - 15 - d[1]*400})
+           .style("opacity", function(d) { if (d[1]==0) {return 0;} else {return 1;} })
+           .attr("text-anchor", "middle").attr("fill", "#ad494a");
+        
+        svg.selectAll("text_axis")
+           .data(quitters).enter().append("text")
+           .text(function(d) { return d[0] ;})
+           .attr("x", function(d, i) { return i*60 + 40;})
+           .attr("y", 130).attr("text-anchor", "middle").attr("fill", "#ad494a")
+           .attr("font-size", "10px")
+           .attr("stroke-width", "3px");
+      }
+      
+      histogram();
+    </script>
+
+    <p class="justify">
+    
+    Using individual data for each rider, I plot the average speed of each rider over the 
+    different stages. The graphs are basic scatter plots, where blue dots represent different
+    riders. Looking at data points for all riders gives a better sense of how doping is being
+    used by all riders in the Tour de France, rather than just looking at winners only. The 
+    scatter plot also gives an idea about the spread of the riders: are average speeds close
+    together or more spread out? I also added a smoothed red line that shows what the average 
+    speed was for a specific year. 
+    <br>
+    <br>
+    I do this for all stages, for all mountain stages and all time trials, since both mountain
+    stages and time trials are very intense endeavors. The graph shows a drop in average speed
+    across all stage types, with increasing average speeds during the last Tour de France. 
+    This is not conclusive evidence that doping is back on the rise, but it is worth following 
+    up what will happen to the average speed this year.
+    
+    </p>
+    
+    <p class="center">    
+    
+    Go to the <a href=/graph>graph</a>.
+    
+    </p>
+    <hr>
+    <p class="bottom">
+    
+    The data was made available by <a href="http://www.rosuda.org/~theus/">Martin Theus</a>.
+    The data is processed using <a href="http://www.python.org/">python</a> and 
+    <a href="http://pandas.pydata.org/">pandas</a>.  The interactive graph on is built using 
+    <a href="http://d3js.org/">d3</a>.    
+    
+    </p>
+  
+  </body>
+</html>
